@@ -228,21 +228,12 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
 
     		let next = this.nextSibling,
             divNode=jQuery(this).find('div[datatype="rdf:HTML"]')[0]
-            if (divNode) {
-            	while (next && next.localName!='section'){
-            		this.parentNode.removeChild(next)
-            		divNode.appendChild(next)
-            		next=this.nextSibling
-            		if (!next) {break}
-            		}
-            }else{
-            	while (next && next.localName!='section'){
-            		this.parentNode.removeChild(next)
-            		this.appendChild(next)
-            		next=this.nextSibling
-            		if (!next) {break}
-            		}            
-            }
+    		while (next && next.localName!='section'){
+    			this.parentNode.removeChild(next)
+    			divNode.appendChild(next)
+    			next=this.nextSibling
+    			if (!next) {break}
+    			}
     	})
     	if (sidetagList.length > 0) {
     		jQuery(htmlCode).find('section').each(function()
