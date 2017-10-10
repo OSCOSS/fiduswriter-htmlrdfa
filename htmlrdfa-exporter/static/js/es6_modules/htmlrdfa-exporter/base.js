@@ -10,6 +10,7 @@ import {
 import {
     docSchema
 } from "../schema/document"
+import {escapeText} from "../common"
 
 export class BaseHTMLRDFaExporter extends BaseDOMExporter {
     joinDocumentParts() {
@@ -323,7 +324,7 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
                             <h2 property="schema:name">Answer</h2>
                             <div datatype="rdf:HTML" property="rdf:value schema:description"
                                     resource="i:#answer-${answer.id}" typeof="oa:TextualBody">
-                                ${escapeText(answer.comment)}
+                                ${escapeText(answer.answer)}
                             </div>
                         </section>`
                 )
@@ -440,8 +441,8 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
 
         jQuery(dom).find('h1').each(function(index) {
             if (this.classList !== null && this.innerHTML !== null) {
-                className = this.innerHTML
-                className = className.replace(/\s+/g, '')
+                className = this.innerText
+                className = escapeText(className.replace(/\s+/g, ''))
                 if (className !== null && className !== "") {
                     //Titles are also H1 in FW, which have not class names
                     this.classList.add(className)
