@@ -71,7 +71,6 @@ export class HTMLRDFaExporter extends BaseHTMLRDFaExporter {
 
         let includeZips = []
 
-        console.log("in rdfa export index")
         let httpOutputList = findImages(contents)
 
         contents = this.addSectionsTag(contents)

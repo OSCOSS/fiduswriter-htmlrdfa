@@ -257,79 +257,84 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
                                 }"
                         >`,
                     commentBody =
-                    '<h3 property="schema:name" style="display:none">' +
-                    commentNode.userName +
-                    '   <span rel="oa:motivatedBy" resource="oa:replying">replies</span></h1>\
-    	<dl class="author-name"><dt>Authors</dt><dd><span rel="schema:creator"><span about="userURI#' +
-                    commentNode.user +
-                    '" typeof="schema:Person">\
-    	<img alt="" rel="schema:image" src="' +
-                    commentNode.userAvatar +
-                    '" width="48" height="48"> <a href="#">\
-    	<span about="userURI#' +
-                    commentNode.user + '" property="schema:name">' +
-                    commentNode.userName +
-                    '</span></a></span></span></dd></dl>\
-    	<dl class="published"><dt>Published</dt><dd><a href="' +
-                    window.location.href + '#' + commentNode.id +
-                    '"><time datetime="' + commentNode.date +
-                    '" datatype="xsd:dateTime" property="schema:datePublished" content="' +
-                    commentNode.date + '">' + commentNode.date +
-                    '</time></a></dd>\
-    	<section id="comment-' +
-                    commentNode.id +
-                    '" rel="oa:hasBody" resource="i:#comment-' +
-                    commentNode.id +
-                    '">\
-    	<h2 property="schema:name">Comment</h2>\
-    	<div datatype="rdf:HTML" property="rdf:value schema:description" resource="i:#comment-' +
-                    commentNode.id + '" typeof="oa:TextualBody">' +
-                    commentNode.comment + '</div></section>'
+                    `<h3 property="schema:name" style="display:none">
+                        ${commentNode.userName}
+                        <span rel="oa:motivatedBy" resource="oa:replying">replies</span>
+                    </h3>
+    	            <dl class="author-name"><dt>Authors</dt><dd><span rel="schema:creator">
+                        <span about="userURI#${commentNode.user}" typeof="schema:Person">
+    	                   <img alt="" rel="schema:image" src="${commentNode.userAvatar}" width="48" height="48">
+                           <a href="#"><span about="userURI#${commentNode.user}" property="schema:name">
+                               ${commentNode.userName}
+                           </a>
+                        </span>
+                    </dl>
+    	            <dl class="published">
+                        <dt>Published</dt>
+                        <dd>
+                            <a href="${window.location.href}#${commentNode.id}">
+                                <time datetime="${commentNode.date}"
+                                        datatype="xsd:dateTime" property="schema:datePublished"
+                                        content="${commentNode.date}">
+                                    ${commentNode.date}
+                                </time>
+                            </a>
+                        </dd>
+                    </dl>
+    	            <section id="comment-${commentNode.id}" rel="oa:hasBody"
+                            resource="i:#comment-${commentNode.id}">
+    	                <h2 property="schema:name">Comment</h2>
+    	                <div datatype="rdf:HTML" property="rdf:value schema:description"
+                                resource="i:#comment-${commentNode.id}" typeof="oa:TextualBody">
+                            ${commentNode.comment}
+                        </div>
+                    </section>`
 
-                if (commentNode.answers.length > 0) {
-                    for (let i = 0; i < commentNode.answers.length; i++) {
-                        commentBody +=
-                            '<h3 property="schema:name" style="display:none">Answers</h2><dl class="author-name"><dt>Authors</dt><dd><span rel="schema:creator"><span about="userURI#' +
-                            commentNode.answers[i].user +
-                            '" typeof="schema:Person">\
-    	<img alt="" rel="schema:image" src="' +
-                            commentNode.answers[i].userAvatar +
-                            '" width="48" height="48"> </img><a href="#">\
-    	<span about="userURI#' +
-                            commentNode.answers[i].user +
-                            '" property="schema:name">' +
-                            commentNode.answers[i].userName +
-                            '</span></a></span></span></dd></dl>\
-    	<dl class="published"><dt>Published</dt><dd><a href="' +
-                            window.location.href + '#' +
-                            commentNode.answers[i].id +
-                            '"><time datetime="' + commentNode.answers[
-                                i].date +
-                            '" datatype="xsd:dateTime" property="schema:datePublished" content="' +
-                            commentNode.answers[i].date + '">' +
-                            commentNode.answers[i].date +
-                            '</time></a></dd>\
-    	<section id="answer-' +
-                            commentNode.answers[i].id +
-                            '" rel="oa:hasBody" resource="i:#answer-' +
-                            commentNode.answers[i].id +
-                            '">\
-    	<h2 property="schema:name">Answer</h2>\
-    	<div datatype="rdf:HTML" property="rdf:value schema:description" resource="i:#answer-' +
-                            commentNode.answers[i].id +
-                            '" typeof="oa:TextualBody">' +
-                            commentNode.answers[i].comment +
-                            '</div></section>'
+                commentBody += commentNode.answers.map(answer =>
+                    `<h3 property="schema:name" style="display:none">
+                        Answers</h3>
+                    <dl class="author-name">
+                        <dt>Authors</dt>
+                        <dd>
+                            <span rel="schema:creator">
+                            <span about="userURI#${answer.user}" typeof="schema:Person">
+                            <img alt="" rel="schema:image" src="${answer.userAvatar}"
+                                    width="48" height="48">
+                            </img>
+                            <a href="#">
+                                <span about="userURI#${answer.user}" property="schema:name">
+                                    ${escapeText(answer.userName)}
+                                </span>
+                            </a>
+                        </dd>
+                    </dl>
+                    <dl class="published">
+                        <dt>Published</dt>
+                        <dd>
+                            <a href="${window.location.href}#${answer.id}">
+                                <time datetime="${answer.date}" datatype="xsd:dateTime"
+                                        property="schema:datePublished" content="${answer.date}">
+                                        ${answer.date}
+                                </time>
+                            </a>
+                        </dd>
+                        <section id="answer-${answer.id}" rel="oa:hasBody"
+                                resource="i:#answer-${answer.id}">
+                            <h2 property="schema:name">Answer</h2>
+                            <div datatype="rdf:HTML" property="rdf:value schema:description"
+                                    resource="i:#answer-${answer.id}" typeof="oa:TextualBody">
+                                ${escapeText(answer.comment)}
+                            </div>
+                        </section>`
+                )
 
-                    }
                 }
                 sidetags = commentHeader + commentBody
                 let sideTagNode = document.createElement('aside')
                 sideTagNode.classList.add('note')
                 sideTagNode.classList.add('do')
-                sideTagNode.innerHTML = '<blockquote cite="' +
-                    commentNode.id + '">' + sidetags +
-                    '</br></br></blockquote>'
+                sideTagNode.innerHTML =
+                    `<blockquote cite="${commentNode.id}">${sidetags}</br></br></blockquote>`
                 sidetagList.push(sideTagNode)
             }
         })
@@ -386,12 +391,14 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
                 let script = document.createElement('script')
                 script.innerHTML =
                     `jQuery( document ).ready(function() {
-    			jQuery(this).find('span.comment').each(function () {
-                        var id=jQuery(this).attr('data-id');
-                        var top=jQuery(this).offset().top - 40;
-                        jQuery(document).find('article[id="'+id+'"]').each(function () {
-                            jQuery(this).css('top',top);
-                        });});});`
+    			        jQuery(this).find('span.comment').each(function () {
+                            var id=jQuery(this).attr('data-id');
+                            var top=jQuery(this).offset().top - 40;
+                            jQuery(document).find('article[id="'+id+'"]').each(function () {
+                                jQuery(this).css('top',top);
+                            });
+                        });
+                    });`
                 this.appendChild(script)
             })
 
@@ -411,8 +418,8 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
                     this.id = className
                     this.outerHTML =
                         `<section id="${className}" resource="#${className}">
-                        <h4 property="schema:name">${this.innerHTML}</h4>
-                    </section>`
+                            <h4 property="schema:name">${this.innerHTML}</h4>
+                        </section>`
                 }
             }
         })
@@ -426,8 +433,8 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
                     this.id = className
                     this.outerHTML =
                         `<section id="${className}" inlist="" resource="#${className}">
-                        <h3 property="schema:name">${this.innerHTML}</h3>
-                    </section>`
+                            <h3 property="schema:name">${this.innerHTML}</h3>
+                        </section>`
                 }
             }
         })
