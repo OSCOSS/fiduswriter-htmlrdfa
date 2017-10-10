@@ -93,7 +93,6 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
 
         jQuery(htmlCode).find('span.comment').each(function() {
             let rect = this.getBoundingClientRect()
-            console.log(rect.top, rect.right, rect.bottom, rect.left)
             let id = jQuery(this).attr('data-id')
             jQuery(this).attr({
                 "rel": "schema:hasPart",
@@ -255,7 +254,8 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
                         `<article id="${commentNode.id}" about="i:" typeof="oa:Annotation"
                                 prefix="rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns# schema: http://schema.org/ dcterms: http://purl.org/dc/terms/ oa: http://www.w3.org/ns/oa# as: https://www.w3.org/ns/activitystreams# i: ${
                                     `${window.location.href}#${commentNode.id}`
-                                }">`
+                                }"
+                        >`,
                     commentBody =
                     '<h3 property="schema:name" style="display:none">' +
                     commentNode.userName +
