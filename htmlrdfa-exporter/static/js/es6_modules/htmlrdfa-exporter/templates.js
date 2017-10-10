@@ -4,7 +4,7 @@ export let htmlExportTemplate = ({title, styleSheets, part, contents}) =>
 `<!DOCTYPE html>
 <html>
     <head>
-        <title>${title}</title>
+        <title>${escapeText(title)}</title>
         ${
             styleSheets.map(item =>
                 `\t<link rel="stylesheet" type="text/css" href="${item.filename}" />`
