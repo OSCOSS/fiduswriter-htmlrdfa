@@ -10,7 +10,18 @@ import {
 import {
     docSchema
 } from "../schema/document"
-import {escapeText} from "../common"
+import {
+    escapeText
+} from "../common"
+import {
+    TAGS
+} from "./tags"
+import {
+    commentHeaderTemplate,
+    commentBodyTemplate,
+    commentHeaderRDFaTemplate,
+    commentBodyRDFaTemplate
+} from "./templates"
 
 export class BaseHTMLRDFaExporter extends BaseDOMExporter {
     joinDocumentParts() {
@@ -98,18 +109,20 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
             jQuery(this).attr({
                 "rel": "schema:hasPart",
                 "typeof": "dctypes:Text",
-                "resource": "r-" + id
+                "resource": `r-${id}`
             })
             let commentDescription = this.innerHTML,
-                commentTag = '<mark id="' + id +
-                '" property="schema:description">' +
-                commentDescription + '</mark>',
+                commentTag =
+                    `<mark id="${id}" property="schema:description">
+                        ${commentDescription}
+                    </mark>`,
                 suppTag =
-                '<sup class="ref-annotation">\
-    		<a rel="cito:hasReplyFrom" href="#' +
-                id + '" resource="' + window.location.href +
-                '/comment-' + id + '">\
-       		💬</a></sup>'
+                `<sup class="ref-annotation">
+    		        <a rel="cito:hasReplyFrom" href="#${id}"
+                                resource="${window.location.href}/comment-${id}">
+       		              💬
+                    </a>
+                </sup>`
             jQuery(this).html(commentTag + suppTag)
             jQuery(this).addClass("ref do")
 
@@ -120,83 +133,14 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
 
 
     createComment(commentNode) {
-        let commentHeader =
-            '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>\
-    	<meta http-equiv="content-type" content="text/html; charset=UTF-8">\<meta charset="utf-8">\
-    	<title>' +
-            window.location.href + '#' + commentNode.id +
-            '</title></head><body><main>\
-    	<article id="' + commentNode
-            .id +
-            '" about="i:" typeof="oa:Annotation" prefix="rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns# schema: http://schema.org/ dcterms: http://purl.org/dc/terms/ oa: http://www.w3.org/ns/oa# as: https://www.w3.org/ns/activitystreams#\
-    	 i: ' +
-            window.location.href + '#' + commentNode.id + '">',
-            commentBody = '<h1 property="schema:name">' + commentNode.userName +
-            '   <span rel="oa:motivatedBy" resource="oa:replying">replies</span></h1>\
-    	<dl class="author-name"><dt>Authors</dt><dd><span rel="schema:creator"><span about="userURI#' +
-            commentNode.user +
-            '" typeof="schema:Person">\
-    	<img alt="" rel="schema:image" src="' +
-            commentNode.userAvatar +
-            '" width="48" height="48"> <a href="#">\
-    	<span about="userURI#' +
-            commentNode.user + '" property="schema:name">' + commentNode.userName +
-            '</span></a></span></span></dd></dl>\
-    	<dl class="published"><dt>Published</dt><dd><a href="' +
-            window.location.href + '#' + commentNode.id +
-            '"><time datetime="' + commentNode.date +
-            '" datatype="xsd:dateTime" property="schema:datePublished" content="' +
-            commentNode.date + '">' + commentNode.date +
-            '</time></a></dd>\
-    	<section id="comment-' + commentNode.id +
-            '" rel="oa:hasBody" resource="i:#comment-' + commentNode.id +
-            '">\
-    	<h2 property="schema:name">Comment</h2>\
-    	<div datatype="rdf:HTML" property="rdf:value schema:description" resource="i:#comment-' +
-            commentNode.id + '" typeof="oa:TextualBody">' + commentNode.comment +
-            '</div></section></br></br>'
+        let commentHeader = commentHeaderTemplate({commentNode, href: window.location.href}),
+            commentBody = commentBodyTemplate({commentNode, href: window.location.href}),
+            commentEnd = '</article></main></body></html>'
 
-        if (commentNode.answers.length > 0) {
-            for (let i = 0; i < commentNode.answers.length; i++) {
-                commentBody +=
-                    '<h2 property="schema:name">Answers</h2></br>/br><dl class="author-name"><dt>Authors</dt><dd><span rel="schema:creator"><span about="userURI#' +
-                    commentNode.answers[i].user +
-                    '" typeof="schema:Person">\
-    	<img alt="" rel="schema:image" src="' +
-                    commentNode.answers[i].userAvatar +
-                    '" width="48" height="48"> <a href="#">\
-    	<span about="userURI#' +
-                    commentNode.answers[i].user +
-                    '" property="schema:name">' + commentNode.answers[i].userName +
-                    '</span></a></span></span></dd></dl>\
-    	<dl class="published"><dt>Published</dt><dd><a href="' +
-                    window.location.href + '#' + commentNode.answers[i].id +
-                    '"><time datetime="' + commentNode.answers[i].date +
-                    '" datatype="xsd:dateTime" property="schema:datePublished" content="' +
-                    commentNode.answers[i].date + '">' + commentNode.answers[
-                        i].date +
-                    '</time></a></dd>\
-    	<section id="answer-' +
-                    commentNode.answers[i].id +
-                    '" rel="oa:hasBody" resource="i:#answer-' + commentNode
-                    .answers[i].id +
-                    '">\
-    	<h2 property="schema:name">Answer</h2>\
-    	<div datatype="rdf:HTML" property="rdf:value schema:description" resource="i:#answer-' +
-                    commentNode.answers[i].id +
-                    '" typeof="oa:TextualBody">' + commentNode.answers[i].comment +
-                    '</div></section>'
-
-            }
-
+        return {
+            filename: `comment#${commentNode.id}.html`,
+            contents: commentHeader + commentBody + commentEnd
         }
-
-        let commentEnd = '</article></main></body></html>',
-            commentFile = {
-                filename: 'comment#' + commentNode.id + '.html',
-                contents: commentHeader + commentBody + commentEnd
-            }
-        return commentFile
     }
 
     converAuthorsToRDFa(dom) {
@@ -209,13 +153,15 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
         let className
         jQuery(dom).find('span.author').each(function(index) {
             if (this.classList !== null && this.innerHTML !== null) {
-                className = this.innerHTML
-                className = className.replace(/\s+/g, '')
+                className = this.innerText
+                className = escapeText(className.replace(/\s+/g, ''))
                 this.classList.add(className)
                 this.id = className
                 this.outerHTML =
-                    `<dd id="${className}" rel="bibo:authorList"  resource="#${className}">
-                        <span rel="schema:creator schema:publisher schema:author" typeof="schema:person">${this.innerHTML}</span>
+                    `<dd id="${className}" rel="bibo:authorList" resource="#${className}">
+                        <span rel="schema:creator schema:publisher schema:author" typeof="schema:person">
+                            ${this.innerHTML}
+                        </span>
                     </dd>`
             }
         })
@@ -251,83 +197,8 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
                 comments != null && sidetagList != null &&
                 sidetagList.constructor == Array) {
                 let commentNode = comments[id],
-                    commentHeader =
-                        `<article id="${commentNode.id}" about="i:" typeof="oa:Annotation"
-                                prefix="rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns# schema: http://schema.org/ dcterms: http://purl.org/dc/terms/ oa: http://www.w3.org/ns/oa# as: https://www.w3.org/ns/activitystreams# i: ${
-                                    `${window.location.href}#${commentNode.id}`
-                                }"
-                        >`,
-                    commentBody =
-                    `<h3 property="schema:name" style="display:none">
-                        ${commentNode.userName}
-                        <span rel="oa:motivatedBy" resource="oa:replying">replies</span>
-                    </h3>
-    	            <dl class="author-name"><dt>Authors</dt><dd><span rel="schema:creator">
-                        <span about="userURI#${commentNode.user}" typeof="schema:Person">
-    	                   <img alt="" rel="schema:image" src="${commentNode.userAvatar}" width="48" height="48">
-                           <a href="#"><span about="userURI#${commentNode.user}" property="schema:name">
-                               ${commentNode.userName}
-                           </a>
-                        </span>
-                    </dl>
-    	            <dl class="published">
-                        <dt>Published</dt>
-                        <dd>
-                            <a href="${window.location.href}#${commentNode.id}">
-                                <time datetime="${commentNode.date}"
-                                        datatype="xsd:dateTime" property="schema:datePublished"
-                                        content="${commentNode.date}">
-                                    ${commentNode.date}
-                                </time>
-                            </a>
-                        </dd>
-                    </dl>
-    	            <section id="comment-${commentNode.id}" rel="oa:hasBody"
-                            resource="i:#comment-${commentNode.id}">
-    	                <h2 property="schema:name">Comment</h2>
-    	                <div datatype="rdf:HTML" property="rdf:value schema:description"
-                                resource="i:#comment-${commentNode.id}" typeof="oa:TextualBody">
-                            ${commentNode.comment}
-                        </div>
-                    </section>`
-
-                commentBody += commentNode.answers.map(answer =>
-                    `<h3 property="schema:name" style="display:none">
-                        Answers</h3>
-                    <dl class="author-name">
-                        <dt>Authors</dt>
-                        <dd>
-                            <span rel="schema:creator">
-                            <span about="userURI#${answer.user}" typeof="schema:Person">
-                            <img alt="" rel="schema:image" src="${answer.userAvatar}"
-                                    width="48" height="48">
-                            </img>
-                            <a href="#">
-                                <span about="userURI#${answer.user}" property="schema:name">
-                                    ${escapeText(answer.userName)}
-                                </span>
-                            </a>
-                        </dd>
-                    </dl>
-                    <dl class="published">
-                        <dt>Published</dt>
-                        <dd>
-                            <a href="${window.location.href}#${answer.id}">
-                                <time datetime="${answer.date}" datatype="xsd:dateTime"
-                                        property="schema:datePublished" content="${answer.date}">
-                                        ${answer.date}
-                                </time>
-                            </a>
-                        </dd>
-                        <section id="answer-${answer.id}" rel="oa:hasBody"
-                                resource="i:#answer-${answer.id}">
-                            <h2 property="schema:name">Answer</h2>
-                            <div datatype="rdf:HTML" property="rdf:value schema:description"
-                                    resource="i:#answer-${answer.id}" typeof="oa:TextualBody">
-                                ${escapeText(answer.answer)}
-                            </div>
-                        </section>`
-                )
+                    commentHeader = commentHeaderRDFaTemplate({commentNode, href: window.location.href}),
+                    commentBody = commentBodyRDFaTemplate({commentNode, href: window.location.href})
 
                 sidetags = commentHeader + commentBody
                 let sideTagNode = document.createElement('aside')
@@ -411,8 +282,8 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
 
         jQuery(dom).find('h3').each(function(index) {
             if (this.classList !== null && this.innerHTML !== null) {
-                className = this.innerHTML
-                className = className.replace(/\s+/g, '')
+                className = this.innerText
+                className = escapeText(className.replace(/\s+/g, ''))
                 if (className !== null && className !== "") {
                     this.classList.add(className)
                     this.id = className
@@ -426,8 +297,8 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
 
         jQuery(dom).find('h2').each(function(index) {
             if (this.classList !== null && this.innerHTML !== null) {
-                className = this.innerHTML
-                className = className.replace(/\s+/g, '')
+                className = this.innerText
+                className = escapeText(className.replace(/\s+/g, ''))
                 if (className !== null && className !== "") {
                     this.classList.add(className)
                     this.id = className
@@ -448,122 +319,9 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
                     this.classList.add(className)
                     this.id = className
 
-                    let tag = "",
-                        entry1 = ['ACKNOWLEDGMENTS',
-                            'ACKNOWLEDGMENT', 'Acknowledgement',
-                            'Acknowledgements']
+                    let tagger = TAGS.find(def => new RegExp(def.texts.join("|"), 'i').test(className))
+                    let tag = tagger ? tagger.tag : ''
 
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Acknowledgements"
-                    }
-
-                    entry1 = ['Outlook', 'OUTLOOK', 'FUTURE WORK',
-                        'ROADMAP', 'PLAN']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:FutureWork"
-                    }
-
-                    entry1 = ['CONCLUSION', 'Conclusion',
-                        'CONCLUSIONS', 'Conclusions']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Conclusion"
-                    }
-
-                    entry1 = ['Results', 'RESULTS']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Results"
-                    }
-
-                    entry1 = ['Analysis', 'Discussion', 'DISCUSSIONS']
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Discussion"
-                    }
-
-                    entry1 = ['RELATEDWORK', 'LITERATUREREVIEW']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:RelatedWork"
-                    }
-
-                    entry1 = ['VALIDATION', 'Evaluation',
-                        'Experiments', 'EXPERIMENTAL',
-                        'Comparison', 'EVALUATION',
-                        'Experimental']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Evaluation"
-                    }
-
-                    entry1 = ['MOTIVATION', 'Motivation',
-                        'Motivation', 'Case study']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Motivation"
-                    }
-
-                    entry1 = ['Problem', 'PROBLEM', 'Approach',
-                        'APPROACH', 'Case Description']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:ProblemStatement"
-                    }
-
-                    entry1 = ['Abstract', 'ABSTRACT', 'Summary']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Abstract"
-                    }
-
-                    entry1 = ['INTRODUCTION', 'Introduction']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Introduction"
-                    }
-
-                    entry1 = ['APPROACH', 'METHODOLOGY', 'Methods',
-                        'METHODS', 'PROPOSED SOLUTION',
-                        'PROPOSED APPROACH']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:methods"
-                    }
-
-                    entry1 = ['FRAMEWORK', 'Structure', 'SYSTEM',
-                        'Architecture', 'IMPLEMENTATION',
-                        'Implementing', 'schema']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "ssn:System"
-                    }
-
-                    entry1 = ['Keywords', 'KEYWORDS']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "swrc:Keywords"
-                    }
-
-                    entry1 = ['background', 'Concepts',
-                        'BACKGROUND']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Background"
-                    }
-
-                    entry1 = ['MODELING', 'Model', 'Representation',
-                        'Modelling']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Model"
-                    }
-                    entry1 = ['REFERENCE', 'REFERENCES',
-                        'Reference']
-
-                    if (new RegExp(entry1.join("|")).test(className)) {
-                        tag = "deo:Reference"
-                    }
                     this.outerHTML =
                         `<section id="${className}" inlist="" rel="schema:hasPart" resource="#${className}">
                             <h2 property="schema:name">${this.innerHTML}</h2>
