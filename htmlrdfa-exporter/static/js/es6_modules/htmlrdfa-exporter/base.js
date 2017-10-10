@@ -328,7 +328,6 @@ export class BaseHTMLRDFaExporter extends BaseDOMExporter {
                         </section>`
                 )
 
-                }
                 sidetags = commentHeader + commentBody
                 let sideTagNode = document.createElement('aside')
                 sideTagNode.classList.add('note')
