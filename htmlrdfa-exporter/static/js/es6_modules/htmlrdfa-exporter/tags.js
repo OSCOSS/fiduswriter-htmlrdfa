@@ -44,7 +44,7 @@ export const TAGS = [
         texts: ['introduction']
     },
     {
-        tag: 'deo:methods',
+        tag: 'deo:Methods',
         texts: ['approach', 'methodology', 'methods', 'proposedsolution', 'proposedapproach']
     },
     {
