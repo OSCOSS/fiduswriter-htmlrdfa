@@ -1,9 +1,10 @@
 import {
     DOMSerializer
 } from "prosemirror-model"
+
 import {
     BaseDOMExporter
-} from "../exporter/tools/dom-export"
+} from "../exporter/tools/dom_export"
 import {
     RenderCitations
 } from "../citations/render"

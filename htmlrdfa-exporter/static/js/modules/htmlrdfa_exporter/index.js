@@ -1,3 +1,5 @@
+import download from "downloadjs"
+
 import {createSlug} from "../exporter/tools/file"
 import {findImages} from "../exporter/tools/html"
 import {ZipFileCreator} from "../exporter/tools/zip"
@@ -5,7 +7,6 @@ import {htmlExportTemplate} from "./templates"
 import {addAlert} from "../common"
 import {katexRender} from "../katex"
 import {BaseHTMLRDFaExporter} from "./base"
-import download from "downloadjs"
 
 export class HTMLRDFaExporter extends BaseHTMLRDFaExporter {
     constructor(doc, bibDB, imageDB, citationStyles, citationLocales) {
