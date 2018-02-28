@@ -1,6 +1,6 @@
-import {getMissingDocumentListData} from "../../documents/tools"
+import {getMissingDocumentListData} from "../../modules/documents/tools"
 
-import {HTMLRDFaExporter} from "../../htmlrdfa-exporter"
+import {HTMLRDFaExporter} from "../../modules/htmlrdfa-exporter"
 
 export class DocOverviewHTMLRDFa {
     constructor(documentOverview) {

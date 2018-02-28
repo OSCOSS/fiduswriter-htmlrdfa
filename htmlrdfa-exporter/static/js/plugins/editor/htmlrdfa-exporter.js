@@ -1,4 +1,4 @@
-import {HTMLRDFaExporter} from "../../htmlrdfa-exporter"
+import {HTMLRDFaExporter} from "../../modules/htmlrdfa-exporter"
 
 export class EditorHTMLRDFa {
     constructor(editor) {
